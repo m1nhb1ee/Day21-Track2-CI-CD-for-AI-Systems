@@ -1,8 +1,8 @@
-# MLOps Lab Report
+# Bao Cao Lab MLOps
 
-## Selected Hyperparameters
+## Bo Sieu Tham So Da Chon
 
-The selected model is `RandomForestClassifier` with:
+Mo hinh duoc chon la `RandomForestClassifier` voi bo sieu tham so:
 
 ```yaml
 n_estimators: 200
@@ -10,17 +10,17 @@ max_depth: 20
 min_samples_split: 2
 ```
 
-This configuration was chosen after comparing multiple MLflow runs. On the initial phase-1 training set it reached `accuracy = 0.6840`, which was the best local RandomForest result found during the lab. After adding the phase-2 data in the continuous training step, the same configuration reached `accuracy = 0.7540` and `f1_score = 0.7534`, passing the CI/CD eval gate.
+Bo tham so nay duoc chon sau khi so sanh nhieu lan chay tren MLflow. Voi tap du lieu ban dau `train_phase1.csv`, mo hinh dat `accuracy = 0.6840`, la ket qua RandomForest tot nhat trong cac cau hinh da thu. Sau khi bo sung du lieu moi o Buoc 3, cung bo tham so nay dat `accuracy = 0.7540` va `f1_score = 0.7534`, vuot nguong kiem tra chat luong `0.70` cua pipeline.
 
-## Pipeline Summary
+## Tom Tat Pipeline
 
-The completed pipeline runs on GitHub Actions with four jobs: Unit Test, Train, Eval, and Deploy. The Train job pulls versioned data from GCS using DVC, trains the model, writes `outputs/metrics.json`, and uploads `models/model.pkl` to `gs://testingai20k12/models/latest/model.pkl`. The Eval job blocks deployment when accuracy is below `0.70`. The Deploy job restarts the FastAPI service on the GCE VM so it downloads and serves the latest model.
+Pipeline CI/CD chay tren GitHub Actions gom bon job: Unit Test, Train, Eval va Deploy. Job Train dung DVC de pull du lieu da version tu Google Cloud Storage, huan luyen mo hinh, ghi ket qua vao `outputs/metrics.json`, va upload `models/model.pkl` len `gs://testingai20k12/models/latest/model.pkl`. Job Eval chan deploy neu `accuracy < 0.70`. Job Deploy SSH vao GCE VM va restart service FastAPI de tai va phuc vu model moi nhat.
 
-## Issues And Fixes
+## Kho Khan Va Cach Xu Ly
 
-The first pipeline run failed at the Eval job because the phase-1 model reached only `accuracy = 0.6840`, below the required `0.70` threshold. This was expected behavior from the quality gate. I then completed the continuous training step by appending `train_phase2.csv` into `train_phase1.csv`, updating the DVC pointer, pushing the new data to GCS, and pushing the data commit to GitHub. The second pipeline run passed all jobs and deployed successfully.
+Lan chay pipeline dau tien dung o job Eval vi mo hinh huan luyen tren `train_phase1.csv` chi dat `accuracy = 0.6840`, thap hon nguong yeu cau `0.70`. Day la hanh vi dung cua eval gate. Sau do, toi thuc hien Buoc 3 bang cach ghep `train_phase2.csv` vao `train_phase1.csv`, cap nhat file con tro DVC, push du lieu moi len GCS truoc, roi push commit du lieu len GitHub. Lan chay pipeline tiep theo da qua ca bon job va deploy thanh cong.
 
-The deployed API was verified with:
+API sau khi deploy da duoc kiem tra voi ket qua:
 
 ```text
 GET /health -> {"status":"ok"}
